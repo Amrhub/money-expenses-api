@@ -1,15 +1,17 @@
 import { Transform } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
 import { toNumber } from '../helpers/cast.helper';
 export class PaginationDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsNumber()
+  @IsOptional()
   @Transform(({ value }) => toNumber(value))
-  page: number;
+  page?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsNumber()
   @Transform(({ value }) => toNumber(value))
-  rowsPerPage: number;
+  @IsOptional()
+  rowsPerPage?: number;
 }
