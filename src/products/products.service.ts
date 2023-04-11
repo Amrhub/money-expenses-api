@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Transform } from 'class-transformer';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma.service';
 import { PaginationDto } from 'src/shared/dto/Pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -11,9 +15,16 @@ export class ProductsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createProductDto: CreateProductDto) {
-    return this.prismaService.product.create({
-      data: createProductDto,
-    });
+    try {
+      return await this.prismaService.product.create({
+        data: createProductDto,
+      });
+    } catch (error) {
+      if (error.code === 'P2002')
+        throw new BadRequestException('Product name already exists');
+
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async findAll(userId: string, pagination: PaginationDto) {
@@ -46,10 +57,17 @@ export class ProductsService {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    return this.prismaService.product.update({
-      where: { id },
-      data: updateProductDto,
-    });
+    try {
+      return await this.prismaService.product.update({
+        where: { id },
+        data: updateProductDto,
+      });
+    } catch (error) {
+      if (error.code === 'P2002')
+        throw new BadRequestException('Product name already exists');
+
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   async remove(id: number, userId: string) {
