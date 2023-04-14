@@ -10,11 +10,11 @@ export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}
 
   @Post()
-  create(
+  async create(
     @User('id') userId,
     @Body() reqCreateReceiptsDto: ReqCreateReceiptsDto,
   ) {
-    this.receiptsService.create({
+    return await this.receiptsService.create({
       ...reqCreateReceiptsDto,
       userId,
     });

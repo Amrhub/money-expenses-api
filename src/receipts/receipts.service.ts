@@ -18,17 +18,15 @@ export class ReceiptsService {
       const jsonItemsArray =
         reqCreateReceiptsDto.items as unknown as Prisma.JsonArray;
       delete reqCreateReceiptsDto.items;
-      return await this.prismaService.receipt.create({
+      const receipt = await this.prismaService.receipt.create({
         data: {
           ...reqCreateReceiptsDto,
           items: jsonItemsArray,
         },
       });
+
+      return receipt;
     } catch (error) {
-      console.log(
-        '🚀 ~ file: receipts.service.ts:28 ~ ReceiptsService ~ error:',
-        error,
-      );
       if (error.code === 'P2002')
         throw new BadRequestException('Receipt name already exists');
 

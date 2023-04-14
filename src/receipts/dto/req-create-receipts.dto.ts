@@ -1,5 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNumber,
+  IsPositive,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+
+export class Item {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Min(0.1)
+  price: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Min(1)
+  quantity: number;
+}
 
 export class ReqCreateReceiptsDto {
   @ApiProperty()
@@ -10,19 +37,8 @@ export class ReqCreateReceiptsDto {
     type: () => [Item],
   })
   @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => Item)
   items: Item[];
-}
-
-export class Item {
-  @ApiProperty()
-  @IsString()
-  name: string;
-
-  @ApiProperty()
-  @IsString()
-  price: number;
-
-  @ApiProperty()
-  @IsString()
-  quantity: number;
 }
