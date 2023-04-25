@@ -33,3 +33,17 @@ model Receipt {
 
   @@unique([name, userId])
 }
+
+model Bill {
+  id   Int      @id @default(autoincrement())
+  name String
+  date DateTime
+  cost Float
+  type BillType @default(ONCE)
+}
+
+enum BillType {
+  ONCE
+  MONTHLY
+  YEARLY
+}
