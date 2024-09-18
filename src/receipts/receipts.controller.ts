@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
 import { ReqCreateReceiptsDto } from './dto/req-create-receipts.dto';
-import { User } from 'src/authz/decorators/user.decorator';
-import { Auth } from 'src/authz/decorators/auth.decorator';
+import { Auth } from 'src/authz/clerk/auth.decorator';
+import { User } from 'src/authz/clerk/user.decorator';
 
 @Controller('receipts')
 @Auth()
