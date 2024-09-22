@@ -25,13 +25,24 @@ model Product {
 model Receipt {
   id        Int      @id @default(autoincrement())
   name      String
-  items     Json[]
+  items     Item[]
   isDeleted Boolean  @default(false)
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([name, userId])
+}
+
+model Item {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Float
+  quantity  Float
+  Receipt   Receipt? @relation(fields: [receiptId], references: [id])
+  receiptId Int?
+
+  @@unique([name, receiptId])
 }
 
 model Bill {

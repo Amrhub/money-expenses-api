@@ -4,7 +4,6 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ReqCreateReceiptsDto } from './dto/req-create-receipts.dto';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/services/prisma.service';
 
 @Injectable()
@@ -15,13 +14,17 @@ export class ReceiptsService {
     reqCreateReceiptsDto: ReqCreateReceiptsDto & { userId: string },
   ) {
     try {
-      const jsonItemsArray =
-        reqCreateReceiptsDto.items as unknown as Prisma.JsonArray;
+      const items = reqCreateReceiptsDto.items;
       delete reqCreateReceiptsDto.items;
+
       const receipt = await this.prismaService.receipt.create({
         data: {
           ...reqCreateReceiptsDto,
-          items: jsonItemsArray,
+          items: {
+            createMany: {
+              data: items,
+            },
+          },
         },
       });
 
@@ -38,6 +41,9 @@ export class ReceiptsService {
     return this.prismaService.receipt.findMany({
       where: {
         userId,
+      },
+      include: {
+        items: true,
       },
     });
   }
