@@ -4,11 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma.service';
 import { PaginationDto } from 'src/shared/dto/Pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ProductsService {
@@ -25,6 +25,12 @@ export class ProductsService {
 
       throw new InternalServerErrorException('Something went wrong');
     }
+  }
+
+  createMany(createProductDtos: CreateProductDto[]) {
+    return this.prismaService.product.createMany({
+      data: createProductDtos,
+    });
   }
 
   async findAll(userId: string, pagination: PaginationDto) {
