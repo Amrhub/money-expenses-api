@@ -43,6 +43,9 @@ export class GetReceiptResponseDto implements ReceiptsWithItems {
   @ApiProperty()
   updatedAt: Date;
 
+  @ApiProperty()
+  totalPrice: number;
+
   @ApiProperty({
     type: [ReceiptItem],
   })
