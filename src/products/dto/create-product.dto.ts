@@ -9,6 +9,8 @@ export class CreateProductDto {
   @ApiProperty()
   @IsNumber()
   price: number;
+}
 
+export class CreateProduct extends CreateProductDto {
   userId: string;
 }

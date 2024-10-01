@@ -1,12 +1,12 @@
-import { ProductsService } from './../products/products.service';
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
-  BadRequestException,
 } from '@nestjs/common';
-import { ReqCreateReceiptsDto } from './dto/req-create-receipts.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateProductDto } from 'src/products/dto/create-product.dto';
+import { CreateProduct } from 'src/products/dto/create-product.dto';
+import { ProductsService } from './../products/products.service';
+import { ReqCreateReceiptsDto } from './dto/req-create-receipts.dto';
 
 @Injectable()
 export class ReceiptsService {
@@ -27,7 +27,7 @@ export class ReceiptsService {
       const newProductsToCreate = items
         .filter((item) => newProductsNames.has(item.name))
         .map(
-          (item): CreateProductDto => ({
+          (item): CreateProduct => ({
             name: item.name,
             userId: reqCreateReceiptsDto.userId,
             price: item.price,
@@ -40,43 +40,41 @@ export class ReceiptsService {
         .filter((item) => modifiedProductsNames.has(item.name))
         .map((item) => ({ ...item, userId: reqCreateReceiptsDto.userId }));
 
-      const receipt = await (this.prismaService as any).$parent.$transaction(
-        async (tx) => {
-          const receipt = await tx.receipt.create({
-            data: {
-              name: reqCreateReceiptsDto.name,
-              userId: reqCreateReceiptsDto.userId,
-              items: {
-                createMany: {
-                  data: items,
-                },
+      const receipt = await this.prismaService.$transaction(async (tx) => {
+        const receipt = await tx.receipt.create({
+          data: {
+            name: reqCreateReceiptsDto.name,
+            userId: reqCreateReceiptsDto.userId,
+            items: {
+              createMany: {
+                data: items,
               },
             },
-          });
+          },
+        });
 
-          reqCreateReceiptsDto.newProductsNames &&
-            (await this.productsService.createMany(newProductsToCreate));
+        reqCreateReceiptsDto.newProductsNames &&
+          (await this.productsService.createMany(newProductsToCreate));
 
-          reqCreateReceiptsDto.modifiedProductsNames &&
-            (await Promise.all(
-              modifiedProductsToUpdate.map((product) => {
-                return this.prismaService.product.update({
-                  where: {
-                    name_userId: {
-                      name: product.name,
-                      userId: product.userId,
-                    },
+        reqCreateReceiptsDto.modifiedProductsNames &&
+          (await Promise.all(
+            modifiedProductsToUpdate.map((product) => {
+              return this.prismaService.product.update({
+                where: {
+                  name_userId: {
+                    name: product.name,
+                    userId: product.userId,
                   },
-                  data: {
-                    price: product.price,
-                  },
-                });
-              }),
-            ));
+                },
+                data: {
+                  price: product.price,
+                },
+              });
+            }),
+          ));
 
-          return receipt;
-        },
-      );
+        return receipt;
+      });
 
       return receipt;
     } catch (error) {

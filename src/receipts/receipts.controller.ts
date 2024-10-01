@@ -3,8 +3,10 @@ import { ReceiptsService } from './receipts.service';
 import { ReqCreateReceiptsDto } from './dto/req-create-receipts.dto';
 import { Auth } from 'src/authz/clerk/auth.decorator';
 import { User } from 'src/authz/clerk/user.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('receipts')
+@ApiTags('receipts')
 @Auth()
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}

@@ -8,13 +8,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/authz/clerk/auth.decorator';
 import { User } from 'src/authz/clerk/user.decorator';
 import { PaginationDto } from 'src/shared/dto/Pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
+import { GetProductsResponseDto } from './dto/get-products.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -31,6 +32,9 @@ export class ProductsController {
   }
 
   @Get()
+  @ApiOkResponse({
+    type: () => GetProductsResponseDto,
+  })
   findAll(@User('id') userId, @Query() pagination: PaginationDto) {
     return this.productsService.findAll(userId, pagination);
   }

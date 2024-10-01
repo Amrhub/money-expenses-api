@@ -1,52 +1,48 @@
-import { INestApplication, Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
-function extendedClient() {
-  const extendClient = () =>
-    prisma.$extends({
-      result: {
-        receipt: {
-          totalPrice: {
-            needs: {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              items: true,
-            },
-            compute(data) {
-              return data.items.reduce(
-                (acc: number, item: any) => acc + item.price * item.quantity,
-                0,
-              );
-            },
-          },
-        },
-      },
-    });
-
-  // https://github.com/prisma/prisma/issues/18628#issuecomment-1601958220
-  return new Proxy(class {}, {
-    construct(target, args, newTarget) {
-      return Object.assign(
-        Reflect.construct(target, args, newTarget),
-        extendClient(),
-      );
-    },
-  }) as new () => ReturnType<typeof extendClient>;
-}
+import { prismaExtendedClient } from './prisma.extension';
 
 @Injectable()
-export class PrismaService extends extendedClient() {
-  async onModuleInit() {
-    // Uncomment this to establish a connection on startup, this is generally not necessary
-    // https://www.prisma.io/docs/concepts/components/prisma-client/working-with-prismaclient/connection-management#connect
-    await Prisma.getExtensionContext(prisma).$connect();
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  private static instance: PrismaService;
+  private readonly logger = new Logger(PrismaService.name);
+
+  constructor() {
+    if (PrismaService.instance) {
+      return PrismaService.instance;
+    }
+
+    super({
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'stdout', level: 'error' },
+        { emit: 'stdout', level: 'info' },
+        { emit: 'stdout', level: 'warn' },
+      ],
+      datasources: { db: { url: process.env.DATABASE_URL } },
+    });
+
+    PrismaService.instance = this;
   }
 
-  async enableShutdownHooks(app: INestApplication) {
-    process.on('beforeExit', async () => {
-      await app.close();
-    });
+  async initPrismaWithClientExtension() {
+    return await prismaExtendedClient(this);
+  }
+
+  async onModuleInit() {
+    await this.$connect();
+
+    // if (this.config.get('PRISMA_LOG', { infer: true })) {
+    //   //@ts-expect-error: known bug in prism missing proper type
+    //   this.$on('query', (e: Prisma.QueryEvent) => {
+    //     this.logger.log(
+    //       JSON.stringify({
+    //         duration: `${e.duration}ms`,
+    //         query: e.query,
+    //         params: e.params,
+    //       }),
+    //     );
+    //   });
+    // }
   }
 }

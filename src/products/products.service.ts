@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaginationDto } from 'src/shared/dto/Pagination.dto';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProduct, CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -14,7 +14,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ProductsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProduct) {
     try {
       return await this.prismaService.product.create({
         data: createProductDto,
@@ -27,7 +27,7 @@ export class ProductsService {
     }
   }
 
-  createMany(createProductDtos: CreateProductDto[]) {
+  createMany(createProductDtos: CreateProduct[]) {
     return this.prismaService.product.createMany({
       data: createProductDtos,
     });
@@ -62,7 +62,7 @@ export class ProductsService {
     };
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async update(id: number, updateProductDto: CreateProduct) {
     try {
       return await this.prismaService.product.update({
         where: { id },
