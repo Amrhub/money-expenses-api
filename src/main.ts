@@ -12,9 +12,17 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Money Expenses')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addCookieAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    operationIdFactory: (controllerKey: string, methodKey: string) => {
+      const key =
+        controllerKey.toLowerCase().replace('controller', '') +
+        methodKey.charAt(0).toUpperCase() +
+        methodKey.slice(1);
+      return key;
+    },
+  });
 
   SwaggerModule.setup('api', app, document);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));

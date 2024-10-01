@@ -8,14 +8,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/authz/clerk/auth.decorator';
 import { User } from 'src/authz/clerk/user.decorator';
 import { PaginationDto } from 'src/shared/dto/Pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
+import { GetProductsResponseDto } from './dto/get-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
-import { GetProductsResponseDto } from './dto/get-products.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -24,6 +24,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @ApiBody({ type: CreateProductDto, required: true })
   create(@Body() createProductDto: CreateProductDto, @User('id') userId) {
     return this.productsService.create({
       ...createProductDto,
@@ -40,6 +41,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @ApiBody({ type: UpdateProductDto, required: true })
   update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
