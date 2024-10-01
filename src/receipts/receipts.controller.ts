@@ -3,7 +3,8 @@ import { ReceiptsService } from './receipts.service';
 import { ReqCreateReceiptsDto } from './dto/req-create-receipts.dto';
 import { Auth } from 'src/authz/clerk/auth.decorator';
 import { User } from 'src/authz/clerk/user.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { GetReceiptResponseDto } from './dto/get-receipts.dto';
 
 @Controller('receipts')
 @ApiTags('receipts')
@@ -23,6 +24,9 @@ export class ReceiptsController {
   }
 
   @Get()
+  @ApiOkResponse({
+    type: [GetReceiptResponseDto],
+  })
   findAll(@User('id') userId) {
     return this.receiptsService.findAll(userId);
   }
