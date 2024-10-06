@@ -7,4 +7,7 @@ export class UpdateProductDto implements CreateProductDto {
 
   @ApiPropertyOptional()
   price: number;
+
+  @ApiPropertyOptional()
+  store: string;
 }

@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -40,21 +40,34 @@ export class ProductsController {
     return this.productsService.findAll(userId, pagination);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiBody({ type: UpdateProductDto, required: true })
   update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
     @User('id') userId,
   ) {
-    return this.productsService.update(+id, {
-      ...updateProductDto,
-      userId,
-    });
+    return this.productsService.update(
+      +id,
+      {
+        ...updateProductDto,
+        userId,
+      },
+      true,
+    );
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @User('id') userId) {
     return this.productsService.remove(+id, userId);
+  }
+
+  @Get('stores')
+  @ApiOkResponse({
+    type: [String],
+    description: 'List of all stores available for this user',
+  })
+  findAllStores(@User('id') userId: string) {
+    return this.productsService.findAllStores(userId);
   }
 }

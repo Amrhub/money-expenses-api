@@ -4,11 +4,10 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationDto } from 'src/shared/dto/Pagination.dto';
-import { CreateProduct, CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationDto } from 'src/shared/dto/Pagination.dto';
+import { CreateProduct } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -62,11 +61,32 @@ export class ProductsService {
     };
   }
 
-  async update(id: number, updateProductDto: CreateProduct) {
+  /**
+   * @param isPutMethod - if true, it means the request is a PUT request and not specified core fields should be set to null. core fields are name, price, and store
+   */
+  async update(
+    id: number,
+    updateProductDto: CreateProduct,
+    isPutMethod?: boolean,
+  ) {
+    const data:
+      | CreateProduct
+      | {
+          name: string;
+          price: number;
+          store: string;
+        } = isPutMethod
+      ? {
+          name: updateProductDto.name,
+          price: updateProductDto.price,
+          store: updateProductDto.store ?? null,
+        }
+      : updateProductDto;
+
     try {
       return await this.prismaService.product.update({
         where: { id },
-        data: updateProductDto,
+        data: data,
       });
     } catch (error) {
       if (error.code === 'P2002')
@@ -87,5 +107,14 @@ export class ProductsService {
       where: { id },
       data: { isDeleted: true },
     });
+  }
+
+  async findAllStores(userId: string) {
+    const stores = await this.prismaService.product.findMany({
+      where: { isDeleted: false, userId },
+      select: { store: true },
+    });
+
+    return stores.map((store) => store.store);
   }
 }

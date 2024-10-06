@@ -12,6 +12,9 @@ class ProductClass implements Product {
   updatedAt: Date;
 
   @ApiProperty()
+  store: string;
+
+  @ApiProperty()
   isDeleted: boolean;
 
   @ApiProperty()
