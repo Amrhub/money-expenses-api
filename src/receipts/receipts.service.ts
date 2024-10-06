@@ -31,6 +31,7 @@ export class ReceiptsService {
             name: item.name,
             userId: reqCreateReceiptsDto.userId,
             price: item.price,
+            store: reqCreateReceiptsDto.store ?? null,
           }),
         );
       const modifiedProductsNames = new Set(

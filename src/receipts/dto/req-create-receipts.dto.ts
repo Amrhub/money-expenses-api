@@ -43,6 +43,11 @@ export class ReqCreateReceiptsDto {
   @Type(() => Item)
   items: Item[];
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  store?: string;
+
   @ApiPropertyOptional({
     type: [String],
   })
