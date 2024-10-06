@@ -111,7 +111,7 @@ export class ProductsService {
 
   async findAllStores(userId: string) {
     const stores = await this.prismaService.product.findMany({
-      where: { isDeleted: false, userId },
+      where: { isDeleted: false, userId, store: { not: null } },
       select: { store: true },
     });
 
